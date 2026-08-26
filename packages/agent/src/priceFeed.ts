@@ -1,10 +1,3 @@
-// packages/agent/src/priceFeed.ts
-//
-// Feed harga fallback (Binance WebSocket) untuk BTC/ETH underlying.
-// Dipakai HANYA untuk menghitung momentum & volatility di signal engine.
-// Odds on-chain dan eksekusi/settlement tetap dari DreamDEX (lihat dreamdexClient.ts) —
-// lihat spec §3 "Data resilience" untuk alasan kenapa dua sumber ini dipisah.
-
 import WebSocket from "ws";
 
 export interface PricePoint {
@@ -12,51 +5,51 @@ export interface PricePoint {
   timestamp: number;
 }
 
-const HISTORY_WINDOW_MS = 30 * 60 * 1000; // simpan 30 menit terakhir, cukup untuk window 15m/1h
+const HISTORY_WINDOW_MS = 30 * 60 * 1000;
 const history = new Map<string, PricePoint[]>();
-const sockets = new Map<string, WebSocket>();
+let socket: WebSocket | null = null;
 
-/**
- * Mulai stream harga untuk daftar market (simbol Binance lower-case tanpa "usdt", mis. ["btc","eth"]).
- * Reconnect otomatis dengan backoff kalau koneksi putus — lihat spec §13 troubleshooting.
- */
+const MAPPING: Record<string, string> = {
+  bitcoin: "btc",
+  ethereum: "eth"
+};
+
 export function startPriceFeed(markets: string[]): void {
-  for (const market of markets) {
-    history.set(market, []);
-    connect(market, 1000);
-  }
+  for (const market of markets) history.set(market, []);
+  connect(1000);
 }
 
-function connect(market: string, backoffMs: number): void {
-  const symbol = `${market}usdt`;
-  const ws = new WebSocket(`wss://stream.binance.com:9443/ws/${symbol}@trade`);
+function connect(backoffMs: number): void {
+  socket = new WebSocket("wss://ws.coincap.io/prices?assets=bitcoin,ethereum");
 
-  ws.on("open", () => {
-    console.log(`[priceFeed] connected: ${symbol}`);
+  socket.on("open", () => {
+    console.log("[priceFeed] connected to coincap");
   });
 
-  ws.on("message", (raw) => {
+  socket.on("message", (raw) => {
     try {
       const msg = JSON.parse(raw.toString());
-      const price = parseFloat(msg.p);
-      if (!Number.isFinite(price)) return;
-      pushPrice(market, { price, timestamp: Date.now() });
-    } catch {
-      // abaikan pesan yang tidak bisa di-parse, jangan crash agent loop
-    }
+      for (const asset in msg) {
+        const market = MAPPING[asset];
+        if (market) {
+          const price = parseFloat(msg[asset]);
+          if (Number.isFinite(price)) {
+            pushPrice(market, { price, timestamp: Date.now() });
+          }
+        }
+      }
+    } catch {}
   });
 
-  ws.on("close", () => {
-    console.warn(`[priceFeed] disconnected: ${symbol}, reconnecting in ${backoffMs}ms`);
-    setTimeout(() => connect(market, Math.min(backoffMs * 2, 30_000)), backoffMs);
+  socket.on("close", () => {
+    console.warn(`[priceFeed] disconnected, reconnecting in ${backoffMs}ms`);
+    setTimeout(() => connect(Math.min(backoffMs * 2, 30_000)), backoffMs);
   });
 
-  ws.on("error", (err) => {
-    console.error(`[priceFeed] error on ${symbol}:`, err.message);
-    ws.close();
+  socket.on("error", (err) => {
+    console.error(`[priceFeed] error:`, err.message);
+    if (socket) socket.close();
   });
-
-  sockets.set(market, ws);
 }
 
 function pushPrice(market: string, point: PricePoint): void {
@@ -67,7 +60,6 @@ function pushPrice(market: string, point: PricePoint): void {
   history.set(market, arr);
 }
 
-/** Ambil harga N menit terakhir untuk sebuah market. Kosong kalau belum cukup data. */
 export function getRecentPrices(market: string, windowMinutes: number): number[] {
   const arr = history.get(market) ?? [];
   const cutoff = Date.now() - windowMinutes * 60 * 1000;
@@ -75,6 +67,6 @@ export function getRecentPrices(market: string, windowMinutes: number): number[]
 }
 
 export function stopPriceFeed(): void {
-  for (const ws of sockets.values()) ws.close();
-  sockets.clear();
+  if (socket) socket.close();
 }
+
