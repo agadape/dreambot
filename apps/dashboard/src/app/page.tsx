@@ -57,36 +57,81 @@ export default function Dashboard() {
 
       <div className="max-w-[1400px] mx-auto px-4 md:px-8 py-12 md:py-24 relative z-10 flex flex-col gap-24">
         
-        {/* Hero Section */}
-        <header className="flex flex-col items-center text-center gap-8 relative">
-          <Hero3D />
+        {/* BRUTALIST HERO SECTION */}
+        <header className="relative w-full min-h-[70vh] flex flex-col md:flex-row items-center justify-between border-b border-white/10 pb-12 mb-12">
+          
+          {/* Left Column: Massive Typography */}
+          <div className="flex-1 flex flex-col items-start z-10">
+            <motion.div 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, ease: [0.32, 0.72, 0, 1] }}
+              className="rounded-full px-4 py-2 text-[10px] uppercase tracking-[0.3em] font-bold bg-white/5 border border-white/10 text-emerald-500 mb-8 flex items-center gap-3 backdrop-blur-md"
+            >
+              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_12px_rgba(16,185,129,0.8)]" />
+              SYSTEM.ONLINE // T-00:00
+            </motion.div>
+            
+            <div className="flex flex-col gap-0 mb-8 mix-blend-difference">
+              <motion.h1 
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 1, delay: 0.1, ease: [0.32, 0.72, 0, 1] }}
+                className="text-7xl md:text-[8rem] lg:text-[10rem] font-bold tracking-tighter text-white leading-[0.8]"
+              >
+                DREAM
+              </motion.h1>
+              <motion.h1 
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 1, delay: 0.2, ease: [0.32, 0.72, 0, 1] }}
+                className="text-7xl md:text-[8rem] lg:text-[10rem] font-bold tracking-tighter text-emerald-500 leading-[0.8] ml-2 md:ml-12"
+              >
+                SIGNAL.
+              </motion.h1>
+            </div>
+            
+            <motion.p 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 1, delay: 0.4 }}
+              className="text-zinc-500 max-w-md text-sm md:text-base font-mono leading-relaxed border-l border-emerald-500/30 pl-4"
+            >
+              High-frequency momentum & volatility indexing agent. Operating natively on Somnia Shannon Testnet. 
+              <br/><br/>
+              <span className="text-emerald-500/70">Awaiting market anomalies...</span>
+            </motion.p>
+          </div>
+
+          {/* Right Column: 3D Architectural Capsule */}
           <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: [0.32, 0.72, 0, 1] }}
-            className="rounded-full px-4 py-1.5 text-[10px] uppercase tracking-[0.2em] font-medium bg-white/5 border border-white/10 text-zinc-400 flex items-center gap-2"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1.5, delay: 0.3, ease: [0.32, 0.72, 0, 1] }}
+            className="flex-1 w-full mt-12 md:mt-0 relative flex justify-end"
           >
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-            Vanguard Systems Online
+            {/* The Glass Capsule for 3D */}
+            <div className="w-full md:w-[500px] h-[500px] rounded-[3rem] border border-white/10 bg-black/40 backdrop-blur-2xl overflow-hidden relative shadow-[0_0_100px_rgba(16,185,129,0.05)]">
+              {/* Coordinates Decoration */}
+              <div className="absolute top-6 left-6 text-[9px] text-zinc-600 font-mono tracking-widest z-20">
+                LAT: 40.7128 N<br/>
+                LNG: 74.0060 W
+              </div>
+              <div className="absolute bottom-6 right-6 text-[9px] text-emerald-500 font-mono tracking-widest z-20 text-right">
+                QUANT_ENGINE_V1<br/>
+                ACTIVE
+              </div>
+              
+              {/* Target Crosshairs */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] border border-white/5 rounded-full pointer-events-none z-10" />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[40%] h-[40%] border border-white/10 rounded-full pointer-events-none z-10" />
+              <div className="absolute top-0 bottom-0 left-1/2 w-px bg-white/5 pointer-events-none z-10" />
+              <div className="absolute left-0 right-0 top-1/2 h-px bg-white/5 pointer-events-none z-10" />
+
+              {/* The 3D Object */}
+              <Hero3D />
+            </div>
           </motion.div>
-          
-          <motion.h1 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.1, ease: [0.32, 0.72, 0, 1] }}
-            className="text-5xl md:text-7xl lg:text-8xl font-medium tracking-tighter text-white max-w-4xl leading-[1.1]"
-          >
-            DreamBot <span className="text-zinc-600">Signal</span>
-          </motion.h1>
-          
-          <motion.p 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2, ease: [0.32, 0.72, 0, 1] }}
-            className="text-lg md:text-xl text-zinc-500 max-w-2xl leading-relaxed"
-          >
-            Autonomous quantitative execution agent. Operating on Somnia Shannon Testnet with sub-second momentum indexing.
-          </motion.p>
         </header>
 
         {/* Asymmetrical Bento Grid */}

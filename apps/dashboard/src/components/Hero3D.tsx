@@ -36,8 +36,8 @@ function AnimatedMesh() {
 
 export default function Hero3D() {
   return (
-    <div className="absolute inset-0 -z-10 pointer-events-none opacity-80 h-[400px] w-full flex items-center justify-center translate-y-[-50px]">
-      <Canvas camera={{ position: [0, 0, 30], fov: 45 }}>
+    <div className="absolute inset-0 z-0 flex items-center justify-center opacity-90">
+      <Canvas camera={{ position: [0, 0, 20], fov: 45 }}>
         <ambientLight intensity={1} />
         <AnimatedMesh />
       </Canvas>
