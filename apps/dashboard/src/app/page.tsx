@@ -221,105 +221,110 @@ export default function Dashboard() {
         </div>
 
         {/* Live Signal Feed */}
-        <div className="space-y-12">
+        <div className="relative mt-24">
           <motion.div 
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            className="flex items-center justify-between border-b border-white/[0.05] pb-6"
+            className="flex items-end justify-between border-b border-white/20 pb-4 mb-0"
           >
-            <h2 className="text-xl md:text-2xl font-medium tracking-tight text-white flex items-center gap-3">
-              Live Intercepts
-              <span className="px-3 py-1 bg-white/5 rounded-full text-[10px] text-zinc-500 uppercase tracking-widest border border-white/5 font-mono">
-                {signals.length} Entries
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tighter text-white flex items-center gap-4">
+              INTERCEPTS.
+              <span className="px-3 py-1 bg-white/10 text-[10px] text-white uppercase tracking-[0.2em] font-mono rounded-none">
+                {signals.length} RECORDED
               </span>
             </h2>
-            <div className="hidden md:flex items-center gap-2 text-xs text-zinc-600 font-mono uppercase tracking-widest">
-              <Pulse size={16} /> 15s Polling
+            <div className="hidden md:flex items-center gap-2 text-[10px] text-emerald-500 font-mono uppercase tracking-[0.2em]">
+              <Pulse size={14} className="animate-pulse" /> SYNCED
             </div>
           </motion.div>
           
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col border-b border-white/[0.05]">
             <AnimatePresence mode="popLayout">
               {signals.length === 0 ? (
                 <motion.div 
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="py-24 text-center text-zinc-600 text-sm uppercase tracking-widest border border-dashed border-white/[0.05] rounded-[2rem]"
+                  className="py-32 text-center flex flex-col items-center justify-center gap-4 border-l border-r border-white/[0.05]"
                 >
-                  Awaiting Telemetry...
+                  <div className="w-8 h-8 border border-white/20 rounded-full border-t-emerald-500 animate-spin" />
+                  <div className="text-zinc-600 text-xs font-mono uppercase tracking-widest">
+                    Awaiting Telemetry...
+                  </div>
                 </motion.div>
               ) : (
                 signals.map((sig, i) => (
                   <motion.div 
                     key={`${sig.marketId}-${sig.timestamp}`}
-                    initial={{ opacity: 0, y: 40, scale: 0.98, filter: "blur(10px)" }}
-                    animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-                    transition={{ duration: 0.8, ease: [0.32, 0.72, 0, 1] }}
-                    className="bg-white/[0.02] p-1.5 rounded-[2rem] border border-white/[0.05] hover:border-white/[0.1] transition-colors duration-700"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: i * 0.1, ease: [0.32, 0.72, 0, 1] }}
+                    className="grid grid-cols-1 md:grid-cols-12 border-x border-b border-white/[0.05] group hover:bg-white/[0.02] transition-colors duration-500 relative overflow-hidden"
                   >
-                    <div className="bg-[#0a0a0a] rounded-[calc(2rem-0.375rem)] p-6 md:p-8 flex flex-col lg:flex-row gap-8 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
+                    {/* Hover Glow */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.01] to-transparent opacity-0 group-hover:opacity-100 transform -translate-x-full group-hover:translate-x-full transition-all duration-1000 ease-out pointer-events-none" />
+
+                    {/* Column 1: Asset (Span 3) */}
+                    <div className="col-span-1 md:col-span-3 p-6 md:p-10 border-b md:border-b-0 md:border-r border-white/[0.05] flex flex-col justify-between gap-8 relative">
+                      <div className="flex items-center justify-between w-full">
+                        <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-600">Asset</div>
+                        <div className={`w-2 h-2 rounded-full ${sig.direction === "UP" ? "bg-emerald-500" : "bg-rose-500"}`} />
+                      </div>
                       
-                      {/* Asset Block */}
-                      <div className="flex-shrink-0 flex items-center lg:items-start lg:flex-col gap-6 lg:w-48 border-b lg:border-b-0 lg:border-r border-white/[0.05] pb-6 lg:pb-0 lg:pr-6">
-                        <div className={`w-16 h-16 rounded-2xl flex items-center justify-center border shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] ${
-                          sig.direction === "UP" ? "bg-emerald-950/30 border-emerald-900/50 text-emerald-500" : "bg-rose-950/30 border-rose-900/50 text-rose-500"
-                        }`}>
-                          {sig.direction === "UP" ? <ArrowUpRight size={28} weight="light" /> : <ArrowDownRight size={28} weight="light" />}
+                      <div>
+                        <div className="text-5xl md:text-6xl font-bold tracking-tighter text-white uppercase leading-none">
+                          {sig.market}
                         </div>
-                        <div>
-                          <div className="text-3xl font-medium tracking-tighter text-white uppercase">{sig.market}</div>
-                          <div className={`text-sm font-medium tracking-widest uppercase mt-1 ${sig.direction === "UP" ? "text-emerald-500" : "text-rose-500"}`}>
-                            {sig.direction}
-                          </div>
+                        <div className={`text-sm font-mono tracking-widest uppercase mt-2 ${sig.direction === "UP" ? "text-emerald-500" : "text-rose-500"}`}>
+                          TARGET: {sig.direction}
                         </div>
                       </div>
+                    </div>
 
-                      {/* Content Block */}
-                      <div className="flex-1 flex flex-col justify-between gap-6">
-                        <p className="text-lg md:text-xl text-zinc-300 leading-relaxed font-light">
+                    {/* Column 2: Narrative & Trace (Span 7) */}
+                    <div className="col-span-1 md:col-span-7 p-6 md:p-10 border-b md:border-b-0 md:border-r border-white/[0.05] flex flex-col justify-between gap-8">
+                      <div>
+                        <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-600 mb-4">Neural Narrative</div>
+                        <p className="text-xl md:text-2xl text-zinc-300 leading-tight font-medium tracking-tight">
                           {sig.narrative}
                         </p>
-                        
-                        <div className="bg-white/[0.02] border border-white/[0.05] rounded-xl p-4 font-mono text-xs text-zinc-500">
-                          <div className="flex items-center gap-2 mb-3 text-zinc-400">
-                            <Terminal size={14} weight="bold" /> 
-                            <span className="uppercase tracking-widest">Execution Trace</span>
+                      </div>
+                      
+                      <div className="font-mono text-[11px] text-zinc-500 uppercase tracking-widest flex flex-col gap-2 border-t border-white/[0.05] pt-6">
+                        <div className="flex items-center gap-2 text-zinc-400 mb-1">
+                          <Terminal size={14} /> Execution Trace
+                        </div>
+                        {sig.reasoning.map((r, ri) => (
+                          <div key={ri} className="flex gap-4">
+                            <span className="text-emerald-500/50">[{ri}]</span> 
+                            <span className="truncate">{r}</span>
                           </div>
-                          <ul className="space-y-2">
-                            {sig.reasoning.map((r, ri) => (
-                              <li key={ri} className="flex gap-3">
-                                <span className="text-zinc-700">?</span> {r}
-                              </li>
-                            ))}
-                          </ul>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Column 3: Meta (Span 2) */}
+                    <div className="col-span-1 md:col-span-2 p-6 md:p-10 flex flex-col justify-between items-start md:items-end text-left md:text-right bg-black/20">
+                      <div className="flex flex-col gap-1 w-full md:items-end">
+                        <span className="text-[10px] text-zinc-600 font-mono uppercase tracking-[0.2em]">Confidence</span>
+                        <span className="text-4xl font-bold text-white tracking-tighter">{(sig.confidence * 100).toFixed(0)}%</span>
+                      </div>
+                      
+                      <div className="flex flex-col md:items-end gap-4 w-full">
+                        {sig.outcome && sig.outcome !== "PENDING" && (
+                          <div className={`px-2 py-1 text-[9px] font-mono uppercase tracking-[0.2em] border ${
+                            sig.outcome === "WIN" 
+                              ? "text-emerald-400 border-emerald-500/30 bg-emerald-500/10" 
+                              : "text-rose-400 border-rose-500/30 bg-rose-500/10"
+                          }`}>
+                            {sig.outcome}
+                          </div>
+                        )}
+                        <div className="flex items-center gap-2 text-[10px] text-zinc-500 font-mono tracking-widest uppercase">
+                          <Clock size={12} />
+                          {new Date(sig.timestamp).toLocaleTimeString("en-US", { hour12: false })}
                         </div>
                       </div>
-
-                      {/* Meta Block */}
-                      <div className="flex-shrink-0 flex flex-row lg:flex-col justify-between items-end lg:items-end lg:w-32 text-right border-t lg:border-t-0 border-white/[0.05] pt-6 lg:pt-0">
-                        <div className="flex flex-col items-start lg:items-end gap-1">
-                          <span className="text-[10px] text-zinc-600 uppercase tracking-widest">Confidence</span>
-                          <span className="text-2xl font-medium text-white tracking-tight">{(sig.confidence * 100).toFixed(0)}%</span>
-                        </div>
-                        
-                        <div className="flex flex-col items-end gap-3">
-                          {sig.outcome && sig.outcome !== "PENDING" && (
-                            <div className={`px-3 py-1 text-[10px] uppercase tracking-widest font-medium rounded-full border ${
-                              sig.outcome === "WIN" 
-                                ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" 
-                                : "bg-rose-500/10 text-rose-400 border-rose-500/20"
-                            }`}>
-                              {sig.outcome}
-                            </div>
-                          )}
-                          <div className="flex items-center gap-1.5 text-xs text-zinc-600 font-mono">
-                            <Clock size={14} weight="light" />
-                            {new Date(sig.timestamp).toLocaleTimeString("en-US", { hour12: false })}
-                          </div>
-                        </div>
-                      </div>
-
                     </div>
                   </motion.div>
                 ))
