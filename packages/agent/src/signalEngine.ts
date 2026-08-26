@@ -31,12 +31,12 @@ export async function generateSignal(
   const mom = momentum(prices);
   const vol = volatility(prices);
   const reasoning: string[] = [
-    `Momentum ${Math.min(market.windowMinutes, 15)} menit: ${(mom * 100).toFixed(2)}% (ambang batas ±${(MOMENTUM_THRESHOLD * 100).toFixed(1)}%)`,
-    `Volatilitas tercatat: ${(vol * 100).toFixed(2)}%`,
+    `15m Momentum: ${(mom * 100).toFixed(2)}% (threshold ±${(MOMENTUM_THRESHOLD * 100).toFixed(1)}%)`,
+    `Realized Volatility: ${(vol * 100).toFixed(2)}%`,
   ];
 
   if (Math.abs(mom) < MOMENTUM_THRESHOLD) {
-    console.log(`[signalEngine] ${market.symbol}: pergerakan di bawah ambang batas, sinyal ditahan`);
+    console.log(`[signalEngine] ${market.symbol}: momentum below threshold, signal held`);
     return null;
   }
 
@@ -50,8 +50,8 @@ export async function generateSignal(
     const marketLeansUp = impliedUp > 0.5;
     const agree = (direction === "UP") === marketLeansUp;
     reasoning.push(
-      `Probabilitas bursa memprediksi ${(impliedUp * 100).toFixed(0)}% NAIK — ${
-        agree ? "sejalan dengan arah momentum kita" : "pergerakan aslinya berlawanan dengan prediksi bursa (ada peluang cuan tersembunyi/mispricing)"
+      `On-chain Odds implied ${(impliedUp * 100).toFixed(0)}% UP — ${
+        agree ? "aligned with our momentum" : "momentum diverges from market odds (potential mispricing alpha)"
       }`
     );
     // kalau odds SEARAH dengan momentum kita, confidence sedikit naik; kalau berlawanan, agak turun
