@@ -1,24 +1,24 @@
-# DreamDEX Event Contracts — SDK & Docs Feedback
+# DreamDEX Event Contracts – SDK & Docs Feedback
 
-_Disusun dari pengalaman nyata building "DreamBot Signal" selama masa Hackathon._
+_Compiled from our hands-on experience building "DreamBot Signal" during the Hackathon._
 
-## Dokumentasi
+## Documentation
 
-1. [x] **URL GraphQL Indexer untuk Testnet Shannon tersembunyi**. Di halaman dokumentasi SDK (misal *Quick Start*), parameter `indexerUrl` disebutkan sebagai argumen yang wajib, namun nilainya tidak pernah ditulis secara eksplisit. Sebagai developer yang baru masuk, saya harus menebak URL API REST (`stg.api.dreamdex.io/v0`) sebelum menyadari itu salah (REST API tidak melayani event contracts via SDK). Akhirnya saya harus menginspeksi Network Tab di `tvlr.tech` untuk mendapatkan URL `https://tvlr.tech/v1/graphql`. Sangat disarankan untuk menulis endpoint publik `indexerUrl` secara jelas di dokumentasi "Quick Start".
-2. [x] Endpoint fallback di SDK config. Jika `indexerUrl` memang wajib, idealnya `@somnia-chain/markets-sdk` menyediakan konstanta/URL default untuk Testnet Shannon atau setidaknya mengeksposnya di enum/config yang mudah diakses.
+1. [x] **Hidden GraphQL Indexer URL for Shannon Testnet**. In the SDK documentation (e.g., Quick Start), the `indexerUrl` parameter is listed as required, yet the actual URL value is never explicitly documented. As new developers to the ecosystem, we initially guessed REST API URLs (`stg.api.dreamdex.io/v0`) before realizing they don't serve event contracts via the SDK. We eventually had to inspect the Network Tab on `tvlr.tech` to discover `https://tvlr.tech/v1/graphql` and `https://markets.stg.somnia.host/v1/graphql`. It is highly recommended to explicitly state the public `indexerUrl` endpoint in the "Quick Start" guide.
+2. [x] **SDK Endpoint Fallbacks**. If `indexerUrl` is indeed required, ideally `@somnia-chain/markets-sdk` should provide a default constant/URL for the Shannon Testnet, or at least expose it in easily accessible enums/configs out-of-the-box.
 
-## Infrastruktur & Endpoint Event Contracts
+## Infrastructure & Event Contracts Endpoints
 
-1. [x] **Sertifikat SSL / TLS Mismatch**. URL `https://tvlr.tech/v1/graphql` ternyata memiliki sertifikat SSL untuk domain `markets.stg.somnia.host`. Akibatnya, Node.js versi modern (seperti Node 22 yang menggunakan Undici native `fetch`) melempar error `ERR_TLS_CERT_ALTNAME_INVALID` saat memanggil SDK, yang kemudian dibungkus menjadi `connection error` oleh SDK. Solusi kami adalah menggunakan `NODE_TLS_REJECT_UNAUTHORIZED=0` atau langsung memanggil `https://markets.stg.somnia.host/v1/graphql`. Harap sertifikatnya disesuaikan untuk kelancaran integrasi server-to-server bot.
-2. [x] **Error Handling dari Indexer**. Saat staging database Somnia/DreamDEX down (kami mendapati error internal `postgres-error`), HTTP response tetap bernilai 200 OK dengan payload JSON berformat GraphQL Errors. SDK (file `graphqlBoundary.js`) dengan benar melempar error ini, namun terbungkus menjadi pesan `connection error` yang generik, membuat developer bingung apakah koneksi internetnya yang mati, atau DNS-nya yang mati, padahal itu error database di sisi server DreamDEX. Error handling ini bisa diperjelas di sisi Indexer / Envio.
+1. [x] **SSL / TLS Certificate Mismatch**. The URL `https://tvlr.tech/v1/graphql` has an SSL certificate issued for the domain `markets.stg.somnia.host`. Consequently, modern Node.js environments (like Node 22 using native Undici `fetch`) throw an `ERR_TLS_CERT_ALTNAME_INVALID` error when the SDK is invoked, which the SDK then unhelpfully wraps as a generic `connection error`. Our workaround was setting `NODE_TLS_REJECT_UNAUTHORIZED=0` or directly querying `https://markets.stg.somnia.host/v1/graphql`. Please resolve the certificate mismatch for seamless server-to-server bot integrations.
+2. [x] **Indexer Error Handling**. When the Somnia/DreamDEX staging database goes down (we encountered internal `postgres-error` responses), the HTTP response still returns 200 OK with a JSON payload containing GraphQL Errors. The SDK (`graphqlBoundary.js`) correctly throws this, but wraps it in a generic `connection error` message. This leaves developers guessing whether their internet connection failed or DNS is down, when in reality it's a database error on the DreamDEX server side. Indexer/Envio error handling could be more transparent.
 
 ## SDK / Bot Kit
 
-1. [x] **Membuat Order**. Instruksi membuat order sangat mudah digunakan. Metode *mint-a-pair* tanpa perlu penjual (cukup *Buy Up x Buy Down*) merupakan arsitektur AMM collateral-swap yang brilian dan sangat mempermudah pembuatan bot tanpa risiko *inventory*.
-2. [x] `EventContractMarket` (atau tipe turunannya dari `listLiveBinaryMarkets`) sudah rapi dan mudah digabungkan dengan `fetchOrderBook`. Namun, alangkah baiknya jika `outcomes` selalu digaransi eksis di tipe dasar jika itu memang *Binary Market* (tanpa perlu opsional chaining `?.symbol`), karena ini memotong banyak asumsi tipe di sisi TypeScript.
+1. [x] **Order Placement Architecture**. The instructions and implementation for placing orders are extremely intuitive. The *mint-a-pair* approach without needing a counterparty (just *Buy Up x Buy Down*) is a brilliant AMM collateral-swap architecture that heavily simplifies bot creation without *inventory* risk.
+2. [x] **Typing for Binary Markets**. The `EventContractMarket` type (or its descendants from `listLiveBinaryMarkets`) is well-structured and easily pairs with `fetchOrderBook`. However, it would be beneficial if `outcomes` were guaranteed to exist on the base type when it's strictly a *Binary Market* (without requiring optional chaining `?.symbol`). This would eliminate many type assumptions on the TypeScript side.
 
-## Yang sudah bagus (jangan cuma keluhan)
+## The Good Stuff (Praise where it's due)
 
-1. [x] Penggunaan `@somnia-chain/markets-sdk` sangat menolong ketimbang memanggil kontrak pintar langsung (raw viem). Layer abstraksinya pas.
-2. [x] Dokumentasi mengenai *Session Keys* sangat solutif untuk hackathon. Mendorong best practice security di mana kami tidak perlu menaruh private key wallet utama ke dalam `.env` server.
-3. [x] Fitur Unified Indexer (satu titik query untuk spot, perps, event contracts) sangat futuristik dan mempermudah query data ketimbang mendengarkan theGraph yang lambat.
+1. [x] Using `@somnia-chain/markets-sdk` is immensely helpful compared to calling raw smart contracts via `viem`. The abstraction layer hits the perfect sweet spot.
+2. [x] The documentation around **Session Keys** is a lifesaver for hackathons. It enforces security best practices, eliminating the need to expose a main wallet's private key inside a server `.env`.
+3. [x] The **Unified Indexer** feature (a single query endpoint for spot, perps, and event contracts) is futuristic and makes querying data much faster and more reliable compared to listening to a sluggish sub-graph.
