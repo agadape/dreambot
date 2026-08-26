@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Terminal, Crosshair, ShieldCheck, Lightning, Target, ArrowUpRight, ArrowDownRight, Clock, ChartLineUp, Pulse } from "@phosphor-icons/react";
+import Hero3D from "../components/Hero3D";
 
 type Signal = {
   market: string;
@@ -57,7 +58,8 @@ export default function Dashboard() {
       <div className="max-w-[1400px] mx-auto px-4 md:px-8 py-12 md:py-24 relative z-10 flex flex-col gap-24">
         
         {/* Hero Section */}
-        <header className="flex flex-col items-center text-center gap-8">
+        <header className="flex flex-col items-center text-center gap-8 relative">
+          <Hero3D />
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
