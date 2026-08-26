@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Terminal, Crosshair, ShieldCheck, Activity, Target, ArrowUpRight, ArrowDownRight, Clock } from "@phosphor-icons/react";
+import { Terminal, Crosshair, ShieldCheck, Lightning, Target, ArrowUpRight, ArrowDownRight, Clock } from "@phosphor-icons/react";
 
 type Signal = {
   market: string;
@@ -86,7 +86,7 @@ export default function Dashboard() {
             </div>
             <div className="bg-[#0a0a0a] p-6 flex flex-col gap-2">
               <div className="flex items-center gap-2 text-zinc-500 text-xs uppercase tracking-widest">
-                <Activity size={16} /> Executed
+                <Lightning size={16} /> Executed
               </div>
               <div className="text-4xl text-white tracking-tighter">
                 {perf.total}
