@@ -1,0 +1,11 @@
+{
+  "name": "dreambot-signal",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "agent": "npm run dev -w packages/agent"
+  }
+}
