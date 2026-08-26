@@ -6,7 +6,7 @@
 
 import type { Signal } from "./signalEngine";
 
-const LLM_TIMEOUT_MS = 2000;
+const LLM_TIMEOUT_MS = 5000;
 
 export async function narrate(signal: Signal): Promise<string> {
   const apiUrl = process.env.LLM_API_URL;
