@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Terminal, Crosshair, ShieldCheck, Lightning, Target, ArrowUpRight, ArrowDownRight, Clock, Activity, ChartLineUp, Pulse } from "@phosphor-icons/react";
+import { Terminal, Crosshair, ShieldCheck, Lightning, Target, ArrowUpRight, ArrowDownRight, Clock, ChartLineUp, Pulse } from "@phosphor-icons/react";
 
 type Signal = {
   market: string;
