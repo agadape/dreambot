@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "motion/react";
+import { Terminal, Crosshair, ShieldCheck, Activity, Target, ArrowUpRight, ArrowDownRight, Clock } from "@phosphor-icons/react";
 
 type Signal = {
   market: string;
@@ -34,114 +36,165 @@ export default function Dashboard() {
           setSignals(data.signals || []);
           setPerf(data.performance || null);
         }
-      } catch (err) {
-        console.error("Failed to fetch signals", err);
-      }
+      } catch (err) {}
     };
     fetchSignals();
-    const interval = setInterval(fetchSignals, 5000); // Polling setiap 5 detik
+    const interval = setInterval(fetchSignals, 5000);
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white p-8 font-sans">
-      <div className="max-w-4xl mx-auto">
-        <header className="mb-10 text-center md:text-left flex flex-col md:flex-row justify-between items-center">
+    <div className="min-h-screen bg-[#050505] text-zinc-300 font-mono selection:bg-emerald-500/30 selection:text-emerald-400">
+      {/* Brutalist Grid Background */}
+      <div className="fixed inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
+      
+      <div className="max-w-[1200px] mx-auto p-4 md:p-8 relative z-10">
+        
+        {/* Header - Terminal Style */}
+        <header className="mb-12 border-b border-zinc-800 pb-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
           <div>
-            <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 mb-2">
-              DreamBot Signal
-            </h1>
-            <p className="text-gray-400 text-sm md:text-base">
-              Live AI-driven momentum & volatility signals on Somnia Shannon Testnet.
+            <div className="flex items-center gap-3 mb-4">
+              <Terminal size={28} className="text-emerald-500" weight="duotone" />
+              <h1 className="text-2xl md:text-3xl tracking-tighter font-bold text-white uppercase">DreamBot<span className="text-emerald-500">_</span>Signal</h1>
+            </div>
+            <p className="text-zinc-500 text-sm max-w-md leading-relaxed">
+              Autonomous momentum & volatility indexing agent. Scanning Somnia Shannon Testnet.
             </p>
           </div>
-          <div className="mt-4 md:mt-0 flex items-center gap-2 bg-gray-900 border border-gray-800 px-4 py-2 rounded-full">
-            <span className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
-            <span className="text-xs font-medium text-gray-300 tracking-wider uppercase">Live Feed</span>
+          
+          <div className="flex flex-col items-end gap-2">
+            <div className="flex items-center gap-2 bg-emerald-950/30 border border-emerald-900/50 px-3 py-1.5 text-emerald-500 text-xs tracking-widest uppercase">
+              <div className="w-2 h-2 bg-emerald-500 animate-pulse" />
+              System_Online
+            </div>
+            <div className="text-zinc-600 text-xs">
+              UPLINK: ACTIVE // INTERVAL: 15s
+            </div>
           </div>
         </header>
 
+        {/* Performance Metrics - Brutalist Bento */}
         {perf && perf.total > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
-            <div className="bg-gray-900 border border-gray-800 p-5 rounded-2xl text-center">
-              <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-1">Win Rate</p>
-              <p className="text-3xl font-bold text-green-400">{(perf.winRate * 100).toFixed(1)}%</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-zinc-800 border border-zinc-800 mb-12">
+            <div className="bg-[#0a0a0a] p-6 flex flex-col gap-2">
+              <div className="flex items-center gap-2 text-zinc-500 text-xs uppercase tracking-widest">
+                <Target size={16} /> Win_Rate
+              </div>
+              <div className="text-4xl text-emerald-400 tracking-tighter">
+                {(perf.winRate * 100).toFixed(1)}%
+              </div>
             </div>
-            <div className="bg-gray-900 border border-gray-800 p-5 rounded-2xl text-center">
-              <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-1">Total</p>
-              <p className="text-3xl font-bold text-white">{perf.total}</p>
+            <div className="bg-[#0a0a0a] p-6 flex flex-col gap-2">
+              <div className="flex items-center gap-2 text-zinc-500 text-xs uppercase tracking-widest">
+                <Activity size={16} /> Executed
+              </div>
+              <div className="text-4xl text-white tracking-tighter">
+                {perf.total}
+              </div>
             </div>
-            <div className="bg-gray-900 border border-gray-800 p-5 rounded-2xl text-center">
-              <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-1">Wins</p>
-              <p className="text-3xl font-bold text-green-400">{perf.wins}</p>
+            <div className="bg-[#0a0a0a] p-6 flex flex-col gap-2">
+              <div className="flex items-center gap-2 text-zinc-500 text-xs uppercase tracking-widest">
+                <ShieldCheck size={16} /> Alpha_Hits
+              </div>
+              <div className="text-4xl text-emerald-400 tracking-tighter">
+                {perf.wins}
+              </div>
             </div>
-            <div className="bg-gray-900 border border-gray-800 p-5 rounded-2xl text-center">
-              <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-1">Losses</p>
-              <p className="text-3xl font-bold text-red-400">{perf.losses}</p>
+            <div className="bg-[#0a0a0a] p-6 flex flex-col gap-2">
+              <div className="flex items-center gap-2 text-zinc-500 text-xs uppercase tracking-widest">
+                <Crosshair size={16} /> Misses
+              </div>
+              <div className="text-4xl text-rose-500 tracking-tighter">
+                {perf.losses}
+              </div>
             </div>
           </div>
         )}
 
+        {/* Signal Feed */}
         <div className="space-y-6">
-          <h2 className="text-2xl font-bold text-white mb-2">Signal History</h2>
+          <div className="flex items-center justify-between border-b border-zinc-900 pb-2">
+            <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-widest">/ Live_Signal_Feed</h2>
+            <span className="text-xs text-zinc-600">AWAITING_INSTRUCTION</span>
+          </div>
           
-          {signals.length === 0 ? (
-            <div className="text-center py-12 bg-gray-900 border border-gray-800 rounded-3xl">
-              <p className="text-gray-500">Belum ada data sinyal tersedia. Menunggu agent run...</p>
-            </div>
-          ) : (
-            signals.map((sig, i) => (
-              <div key={i} className="bg-gray-900 border border-gray-800 p-6 rounded-3xl flex flex-col gap-4 shadow-lg hover:border-gray-700 transition-colors">
-                <div className="flex flex-wrap justify-between items-start gap-4">
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <span className="bg-gray-800 px-3 py-1.5 rounded-lg text-sm font-semibold tracking-wide text-white shadow-sm border border-gray-700">
-                      {sig.market.toUpperCase()}
-                    </span>
-                    <span className={`px-3 py-1.5 rounded-lg text-sm font-bold shadow-sm ${
-                      sig.direction === 'UP' 
-                        ? 'bg-green-500/10 text-green-400 border border-green-500/20' 
-                        : 'bg-red-500/10 text-red-400 border border-red-500/20'
-                    }`}>
-                      {sig.direction}
-                    </span>
-                    <span className="text-gray-400 text-sm font-medium">
-                      Conf: {(sig.confidence * 100).toFixed(0)}%
-                    </span>
-                  </div>
-                  <div className="text-sm text-gray-500 bg-gray-950 px-3 py-1 rounded-full border border-gray-800">
-                    {new Date(sig.timestamp).toLocaleString()}
-                  </div>
+          <div className="flex flex-col gap-4">
+            <AnimatePresence mode="popLayout">
+              {signals.length === 0 ? (
+                <div className="border border-dashed border-zinc-800 p-8 text-center text-zinc-600 text-sm uppercase tracking-widest">
+                  NO_DATA_STREAM_DETECTED
                 </div>
-                
-                <p className="text-gray-200 text-lg leading-relaxed">
-                  {sig.narrative}
-                </p>
-                
-                <div className="bg-gray-950 p-4 rounded-2xl text-sm text-gray-400 font-mono border border-gray-800/50">
-                  <span className="block mb-2 text-gray-500 text-xs tracking-widest uppercase">Reasoning Trace</span>
-                  <ul className="list-disc pl-5 space-y-1">
-                    {sig.reasoning.map((r, ri) => (
-                      <li key={ri}>{r}</li>
-                    ))}
-                  </ul>
-                </div>
-                
-                {sig.outcome && sig.outcome !== "PENDING" && (
-                  <div className="mt-1">
-                    <span className={`inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full font-bold shadow-sm ${
-                      sig.outcome === 'WIN' 
-                        ? 'bg-green-600 text-white' 
-                        : 'bg-red-600 text-white'
-                    }`}>
-                      {sig.outcome === 'WIN' ? '✓' : '✗'} RESULT: {sig.outcome}
-                    </span>
-                  </div>
-                )}
-              </div>
-            ))
-          )}
+              ) : (
+                signals.map((sig, i) => (
+                  <motion.div 
+                    key={`${sig.marketId}-${sig.timestamp}`}
+                    initial={{ opacity: 0, y: -20, backgroundColor: "#064e3b" }}
+                    animate={{ opacity: 1, y: 0, backgroundColor: "#0a0a0a" }}
+                    transition={{ duration: 0.5, ease: "easeOut" }}
+                    className="group border border-zinc-800 bg-[#0a0a0a] p-5 hover:border-zinc-700 transition-colors"
+                  >
+                    <div className="flex flex-col md:flex-row gap-6">
+                      
+                      {/* Left: Direction & Market */}
+                      <div className="flex-shrink-0 flex flex-row md:flex-col items-center md:items-start gap-4 md:w-32">
+                        <div className={`flex items-center gap-2 px-3 py-1.5 text-xs font-bold uppercase tracking-widest ${
+                          sig.direction === "UP" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-rose-500/10 text-rose-400 border border-rose-500/20"
+                        }`}>
+                          {sig.direction === "UP" ? <ArrowUpRight weight="bold" /> : <ArrowDownRight weight="bold" />}
+                          {sig.direction}
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-xl font-bold text-white uppercase tracking-tight">{sig.market}</span>
+                          <span className="text-xs text-zinc-500">CONF: {(sig.confidence * 100).toFixed(0)}%</span>
+                        </div>
+                      </div>
+
+                      {/* Middle: Narrative & Trace */}
+                      <div className="flex-1 flex flex-col gap-4">
+                        <p className="text-sm text-zinc-300 leading-relaxed font-sans">
+                          {sig.narrative}
+                        </p>
+                        
+                        <div className="bg-black border border-zinc-900 p-3 text-xs text-zinc-500 font-mono">
+                          <div className="mb-2 uppercase tracking-widest text-zinc-700">Trace_Log //</div>
+                          <ul className="space-y-1">
+                            {sig.reasoning.map((r, ri) => (
+                              <li key={ri} className="flex gap-2">
+                                <span className="text-emerald-900">&gt;</span> {r}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+
+                      {/* Right: Timestamp & Outcome */}
+                      <div className="flex-shrink-0 flex flex-row md:flex-col items-end md:items-end justify-between md:w-32">
+                        <div className="flex items-center gap-1.5 text-xs text-zinc-600">
+                          <Clock size={14} />
+                          {new Date(sig.timestamp).toLocaleTimeString("en-US", { hour12: false })}
+                        </div>
+                        
+                        {sig.outcome && sig.outcome !== "PENDING" && (
+                          <div className={`mt-auto px-2 py-1 text-[10px] uppercase tracking-widest font-bold border ${
+                            sig.outcome === "WIN" 
+                              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" 
+                              : "bg-rose-500/10 text-rose-400 border-rose-500/20"
+                          }`}>
+                            {sig.outcome}
+                          </div>
+                        )}
+                      </div>
+
+                    </div>
+                  </motion.div>
+                ))
+              )}
+            </AnimatePresence>
+          </div>
         </div>
+        
       </div>
     </div>
   );
 }
+
