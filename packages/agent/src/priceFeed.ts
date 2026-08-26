@@ -1,5 +1,3 @@
-import WebSocket from "ws";
-
 export interface PricePoint {
   price: number;
   timestamp: number;
@@ -7,65 +5,42 @@ export interface PricePoint {
 
 const HISTORY_WINDOW_MS = 30 * 60 * 1000;
 const history = new Map<string, PricePoint[]>();
-let socket: WebSocket | null = null;
-let mockInterval: any = null;
-
-const MAPPING: Record<string, string> = {
-  bitcoin: "btc",
-  ethereum: "eth"
-};
-
-// Base prices for mock
-const basePrices: Record<string, number> = { btc: 60000, eth: 3000 };
+let pollInterval: any = null;
 
 export function startPriceFeed(markets: string[]): void {
-  for (const market of markets) history.set(market, []);
-  connect(1000);
+  for (const market of markets) {
+    history.set(market, []);
+  }
   
-  // MOCK FALLBACK: if WebSocket fails to deliver prices, generate synthetic data so bot still works
-  mockInterval = setInterval(() => {
-    for (const market of markets) {
-      const current = basePrices[market] || 100;
-      // random walk 0.05%
-      const change = current * (Math.random() - 0.5) * 0.001;
-      basePrices[market] = current + change;
-      pushPrice(market, { price: basePrices[market], timestamp: Date.now() });
-    }
-  }, 1000);
+  console.log("[priceFeed] Memulai REST API Polling (Real Data dari Binance.US)");
+  
+  // Ambil harga saat ini langsung
+  fetchPrices(markets);
+  
+  // Polling setiap 10 detik
+  pollInterval = setInterval(() => {
+    fetchPrices(markets);
+  }, 10000);
 }
 
-function connect(backoffMs: number): void {
-  socket = new WebSocket("wss://ws.coincap.io/prices?assets=bitcoin,ethereum");
-
-  socket.on("open", () => {
-    console.log("[priceFeed] connected to coincap");
-  });
-
-  socket.on("message", (raw) => {
-    try {
-      const msg = JSON.parse(raw.toString());
-      for (const asset in msg) {
-        const market = MAPPING[asset];
-        if (market) {
-          const price = parseFloat(msg[asset]);
-          if (Number.isFinite(price)) {
-            basePrices[market] = price; // sync base price
-            pushPrice(market, { price, timestamp: Date.now() });
-          }
-        }
+async function fetchPrices(markets: string[]) {
+  try {
+    for (const market of markets) {
+      const symbol = `${market.toUpperCase()}USDT`;
+      const res = await fetch(`https://api.binance.us/api/v3/ticker/price?symbol=${symbol}`);
+      
+      if (!res.ok) continue;
+      
+      const data = await res.json();
+      const price = parseFloat(data.price);
+      
+      if (Number.isFinite(price)) {
+        pushPrice(market, { price, timestamp: Date.now() });
       }
-    } catch {}
-  });
-
-  socket.on("close", () => {
-    console.warn(`[priceFeed] disconnected, reconnecting in ${backoffMs}ms`);
-    setTimeout(() => connect(Math.min(backoffMs * 2, 30_000)), backoffMs);
-  });
-
-  socket.on("error", (err) => {
-    console.error(`[priceFeed] error:`, err.message);
-    if (socket) socket.close();
-  });
+    }
+  } catch (err) {
+    console.error("[priceFeed] REST fetch error:", (err as Error).message);
+  }
 }
 
 function pushPrice(market: string, point: PricePoint): void {
@@ -83,7 +58,6 @@ export function getRecentPrices(market: string, windowMinutes: number): number[]
 }
 
 export function stopPriceFeed(): void {
-  if (socket) socket.close();
-  if (mockInterval) clearInterval(mockInterval);
+  if (pollInterval) clearInterval(pollInterval);
 }
 
