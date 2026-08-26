@@ -14,6 +14,7 @@ export interface Signal {
   confidence: number; // 0..1
   reasoning: string[];
   timestamp: number;
+  strikePriceAtSignal: number;
 }
 
 const MOMENTUM_THRESHOLD = 0.0001; // 0.01% — direndahkan agar selalu nge-trigger saat demo
@@ -30,42 +31,56 @@ export async function generateSignal(
 
   const mom = momentum(prices);
   const vol = volatility(prices);
-  const reasoning: string[] = [
-    `15m Momentum: ${(mom * 100).toFixed(2)}% (threshold ±${(MOMENTUM_THRESHOLD * 100).toFixed(1)}%)`,
-    `Realized Volatility: ${(vol * 100).toFixed(2)}%`,
-  ];
+  const currentPrice = prices[prices.length - 1]; // get current close price for strike
 
-  if (Math.abs(mom) < MOMENTUM_THRESHOLD) {
-    console.log(`[signalEngine] ${market.symbol}: momentum below threshold, signal held`);
-    return null;
-  }
-
-  const direction: "UP" | "DOWN" = mom >= 0 ? "UP" : "DOWN";
-
-  // Odds skew — bandingkan momentum vs implied probability on-chain (kalau tersedia).
-  let confidence = Math.min(Math.abs(mom) / (vol || 0.0001), 1);
+  // Ambil implied probability (0..1) dari chain
   const odds = await getMarketOdds(market.id);
-  if (odds) {
-    const impliedUp = odds.impliedProbabilityUp;
-    const marketLeansUp = impliedUp > 0.5;
-    const agree = (direction === "UP") === marketLeansUp;
-    reasoning.push(
-      `On-chain Odds implied ${(impliedUp * 100).toFixed(0)}% UP — ${
-        agree ? "aligned with our momentum" : "momentum diverges from market odds (potential mispricing alpha)"
-      }`
-    );
-    // kalau odds SEARAH dengan momentum kita, confidence sedikit naik; kalau berlawanan, agak turun
-    confidence = agree ? Math.min(confidence * 1.1, 1) : confidence * 0.85;
+  const upProbability = odds?.impliedProbabilityUp ?? 0.5;
+
+  const reasoning: string[] = [];
+  let score = 0.5;
+
+  if (Math.abs(mom) > MOMENTUM_THRESHOLD) {
+    if (mom > 0) {
+      reasoning.push(`Realized momentum in ${market.windowMinutes}m is positive (+${(mom * 100).toFixed(2)}%).`);
+      score += 0.2;
+    } else {
+      reasoning.push(`Realized momentum in ${market.windowMinutes}m is negative (${(mom * 100).toFixed(2)}%).`);
+      score -= 0.2;
+    }
   } else {
-    reasoning.push("Odds on-chain tidak tersedia saat ini — confidence hanya dari momentum & volatility");
+    reasoning.push("Momentum is currently flat/neutral.");
   }
+
+  if (vol > 0.005) {
+    reasoning.push(`High Realized Volatility (${(vol * 100).toFixed(2)}%), momentum decay is accelerated.`);
+    score = score > 0.5 ? score - 0.1 : score + 0.1;
+  } else {
+    reasoning.push(`Stable volatility (${(vol * 100).toFixed(2)}%), trend continuation expected.`);
+  }
+
+  if (upProbability > 0.6 && score > 0.5) {
+    reasoning.push(`On-chain odds implied probability indicates UP skew (${(upProbability * 100).toFixed(0)}%). Alignment validated.`);
+    score += 0.15;
+  } else if (upProbability < 0.4 && score < 0.5) {
+    reasoning.push(`On-chain odds implied probability indicates DOWN skew (${(1 - upProbability) * 100}%). Alignment validated.`);
+    score -= 0.15;
+  }
+
+  // Finalize
+  const direction = score > 0.5 ? "UP" : "DOWN";
+  let confidence = Math.abs(score - 0.5) * 2;
+  confidence = Math.min(Math.max(confidence, 0), 1); // clamp 0-1
+
+  if (confidence < 0.2) return null; // terlalu ragu
 
   return {
     market: market.symbol,
     marketId: market.id,
     direction,
-    confidence: Math.round(confidence * 100) / 100,
+    confidence,
     reasoning,
     timestamp: Date.now(),
+    strikePriceAtSignal: currentPrice,
   };
 }

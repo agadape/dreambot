@@ -25,6 +25,9 @@ const redis = process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN
 export interface StoredSignal extends Signal {
   narrative: string;
   outcome?: "WIN" | "LOSS" | "PENDING";
+  commitTxHash?: string;
+  nonce?: string;
+  strikePrice?: number;
 }
 
 function ensureDataDir(): void {
@@ -52,8 +55,19 @@ export async function loadSignals(): Promise<StoredSignal[]> {
   }
 }
 
-export async function saveSignal(signal: Signal, narrative: string): Promise<StoredSignal> {
-  const stored: StoredSignal = { ...signal, narrative, outcome: "PENDING" };
+export async function saveSignal(
+  signal: Signal, 
+  narrative: string, 
+  meta?: { commitTxHash: string; nonce: string; strikePrice: number }
+): Promise<StoredSignal> {
+  const stored: StoredSignal = { 
+    ...signal, 
+    narrative, 
+    outcome: "PENDING",
+    commitTxHash: meta?.commitTxHash,
+    nonce: meta?.nonce,
+    strikePrice: meta?.strikePrice,
+  };
   const all = await loadSignals();
   all.push(stored);
 
