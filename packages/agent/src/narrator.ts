@@ -36,7 +36,7 @@ async function callLlmSummarizer(signal: Signal, apiUrl: string): Promise<string
   const isChatAPI = apiUrl.includes("chat/completions");
   const body = isChatAPI 
     ? {
-        model: process.env.LLM_MODEL || "llama3-8b-8192", // Default Groq model
+        model: process.env.LLM_MODEL || "llama-3.1-8b-instant", // Default Groq model
         messages: [{ role: "user", content: buildPrompt(signal) }],
         temperature: 0.3
       }
@@ -51,7 +51,10 @@ async function callLlmSummarizer(signal: Signal, apiUrl: string): Promise<string
     body: JSON.stringify(body),
   });
   
-  if (!res.ok) throw new Error(`LLM API HTTP ${res.status}`);
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`LLM API HTTP ${res.status}: ${errText}`);
+  }
   const data = await res.json();
   
   const text = isChatAPI 
