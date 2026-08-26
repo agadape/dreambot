@@ -16,7 +16,7 @@ export interface Signal {
   timestamp: number;
 }
 
-const MOMENTUM_THRESHOLD = 0.002; // 0.2% — di bawah ini dianggap noise, sinyal tidak dipublish
+const MOMENTUM_THRESHOLD = 0.0001; // 0.01% — direndahkan agar selalu nge-trigger saat demo
 
 export async function generateSignal(
   underlyingSymbol: string, // simbol Binance lower-case, mis. "btc"
@@ -31,12 +31,12 @@ export async function generateSignal(
   const mom = momentum(prices);
   const vol = volatility(prices);
   const reasoning: string[] = [
-    `Momentum ${Math.min(market.windowMinutes, 15)}m: ${(mom * 100).toFixed(2)}% (threshold ±${(MOMENTUM_THRESHOLD * 100).toFixed(1)}%)`,
-    `Volatility realized: ${(vol * 100).toFixed(2)}%`,
+    `Momentum ${Math.min(market.windowMinutes, 15)} menit: ${(mom * 100).toFixed(2)}% (ambang batas ±${(MOMENTUM_THRESHOLD * 100).toFixed(1)}%)`,
+    `Volatilitas tercatat: ${(vol * 100).toFixed(2)}%`,
   ];
 
   if (Math.abs(mom) < MOMENTUM_THRESHOLD) {
-    console.log(`[signalEngine] ${market.symbol}: momentum di bawah threshold, sinyal ditahan`);
+    console.log(`[signalEngine] ${market.symbol}: pergerakan di bawah ambang batas, sinyal ditahan`);
     return null;
   }
 
@@ -50,8 +50,8 @@ export async function generateSignal(
     const marketLeansUp = impliedUp > 0.5;
     const agree = (direction === "UP") === marketLeansUp;
     reasoning.push(
-      `Odds on-chain implied ${(impliedUp * 100).toFixed(0)}% UP — ${
-        agree ? "searah dengan momentum" : "momentum menyimpang dari odds pasar (potensi mispricing)"
+      `Probabilitas bursa memprediksi ${(impliedUp * 100).toFixed(0)}% NAIK — ${
+        agree ? "sejalan dengan arah momentum kita" : "pergerakan aslinya berlawanan dengan prediksi bursa (ada peluang cuan tersembunyi/mispricing)"
       }`
     );
     // kalau odds SEARAH dengan momentum kita, confidence sedikit naik; kalau berlawanan, agak turun

@@ -22,7 +22,7 @@ export async function narrate(signal: Signal): Promise<string> {
 }
 
 function fallbackTemplate(signal: Signal): string {
-  return `DreamBot menyarankan ${signal.direction} untuk ${signal.market} (confidence ${Math.round(signal.confidence * 100)}%). ${signal.reasoning.join(". ")}.`;
+  return `Sistem AI mendeteksi potensi koin ${signal.market.toUpperCase()} akan ${signal.direction === "UP" ? "NAIK" : "TURUN"} (tingkat keyakinan ${Math.round(signal.confidence * 100)}%). ${signal.reasoning.join(". ")}.`;
 }
 
 async function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
@@ -50,11 +50,12 @@ async function callLlmSummarizer(signal: Signal, apiUrl: string): Promise<string
 
 function buildPrompt(signal: Signal): string {
   return [
-    "Ubah reasoning trading berikut jadi 1-2 kalimat bahasa Indonesia yang natural.",
-    "Jangan menambah klaim, angka, atau keyakinan baru di luar yang diberikan.",
-    `Market: ${signal.market}`,
-    `Arah: ${signal.direction}`,
-    `Confidence: ${signal.confidence}`,
-    `Reasoning: ${signal.reasoning.join("; ")}`,
+    "Kamu adalah AI asisten trading kripto yang keren dan santai.",
+    "Ubah log analisa teknikal berikut menjadi 1-2 kalimat narasi singkat berbahasa Indonesia yang gaul tapi tetap profesional (misalnya pakai kata 'cuan', 'hati-hati', 'gas').",
+    "JANGAN halusinasi atau menambah angka baru di luar data yang diberikan.",
+    `Koin: ${signal.market.toUpperCase()}`,
+    `Prediksi Arah: ${signal.direction === "UP" ? "NAIK (UP)" : "TURUN (DOWN)"}`,
+    `Tingkat Keyakinan: ${Math.round(signal.confidence * 100)}%`,
+    `Alasan teknikal: ${signal.reasoning.join("; ")}`,
   ].join("\n");
 }
