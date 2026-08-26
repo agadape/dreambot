@@ -1,7 +1,7 @@
 // packages/agent/src/index.ts
 //
-// Agent loop utama: setiap LOOP_INTERVAL_MS, untuk tiap market aktif —
-// generate sinyal → narasikan → simpan. Dashboard Next.js membaca hasilnya
+// Agent loop utama: setiap LOOP_INTERVAL_MS, untuk tiap market aktif â
+// generate sinyal â narasikan â simpan. Dashboard Next.js membaca hasilnya
 // dari packages/agent/data/signals.json (lihat store.ts).
 
 import "dotenv/config";
@@ -11,7 +11,7 @@ import { narrate } from "./narrator";
 import { saveSignal } from "./store";
 import { getActiveMarkets, type EventContractMarket } from "./dreamdexClient";
 
-const LOOP_INTERVAL_MS = 2 * 60 * 1000; // 2 menit
+const LOOP_INTERVAL_MS = 15 * 1000; // 15 detik (dipercepat untuk demo)
 const UNDERLYING_SYMBOLS = (process.env.MARKETS ?? "btc,eth").split(",").map((s) => s.trim().toLowerCase());
 
 async function tick(activeMarkets: EventContractMarket[]): Promise<void> {
@@ -28,7 +28,7 @@ async function tick(activeMarkets: EventContractMarket[]): Promise<void> {
 
       const narrative = await narrate(signal);
       const stored = await saveSignal(signal, narrative);
-      console.log(`\n[agent] sinyal baru — ${stored.market} ${stored.direction} (confidence ${stored.confidence})`);
+      console.log(`\n[agent] sinyal baru â ${stored.market} ${stored.direction} (confidence ${stored.confidence})`);
       console.log(`  reasoning: ${stored.reasoning.join(" | ")}`);
       console.log(`  narasi: ${stored.narrative}`);
       
@@ -44,7 +44,7 @@ async function tick(activeMarkets: EventContractMarket[]): Promise<void> {
 }
 
 async function main(): Promise<void> {
-  console.log("=== DreamBot Signal — agent loop ===");
+  console.log("=== DreamBot Signal â agent loop ===");
   console.log(`Markets: ${UNDERLYING_SYMBOLS.join(", ")} | interval: ${LOOP_INTERVAL_MS / 1000}s\n`);
 
   startPriceFeed(UNDERLYING_SYMBOLS);
@@ -55,7 +55,7 @@ async function main(): Promise<void> {
   const runTick = async () => {
     const activeMarkets = await getActiveMarkets();
     if (activeMarkets.length === 0) {
-      console.warn("[agent] getActiveMarkets() kosong — cek dreamdexClient.ts / jalankan `npm run doctor` dulu");
+      console.warn("[agent] getActiveMarkets() kosong â cek dreamdexClient.ts / jalankan `npm run doctor` dulu");
     }
     await tick(activeMarkets);
   };
