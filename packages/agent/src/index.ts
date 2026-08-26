@@ -34,7 +34,7 @@ async function tick(activeMarkets: EventContractMarket[]): Promise<void> {
       console.log(`  narasi: ${stored.narrative}`);
       
       // Push ke Telegram
-      const telegramMsg = `🚨 *DREAMBOT SIGNAL* 🚨\n\n*${stored.market}* -> *${stored.direction}*\n_Confidence:_ ${Math.round(stored.confidence * 100)}%\n\n*Narrative:*\n${stored.narrative}\n\n[Lihat Live Dashboard](https://dreambot-dexsonia.vercel.app/)`;
+      const telegramMsg = `🚨 *DREAMBOT SIGNAL* 🚨\n\n*${stored.market}* -> *${stored.direction}*\n_Confidence:_ ${Math.round(stored.confidence * 100)}%\n\n*Narrative:*\n${stored.narrative}\n\n[View Live Dashboard](https://dreambot-dexsonia.vercel.app/)`;
       sendTelegramAlert(telegramMsg);
 
       // Hari 9-10: Eksekusi otomatis
