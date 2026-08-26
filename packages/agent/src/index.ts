@@ -10,6 +10,7 @@ import { generateSignal } from "./signalEngine";
 import { narrate } from "./narrator";
 import { saveSignal } from "./store";
 import { getActiveMarkets, type EventContractMarket } from "./dreamdexClient";
+import { sendTelegramAlert } from "./telegram";
 
 const LOOP_INTERVAL_MS = 15 * 1000; // 15 detik (dipercepat untuk demo)
 const UNDERLYING_SYMBOLS = (process.env.MARKETS ?? "btc,eth").split(",").map((s) => s.trim().toLowerCase());
@@ -28,10 +29,14 @@ async function tick(activeMarkets: EventContractMarket[]): Promise<void> {
 
       const narrative = await narrate(signal);
       const stored = await saveSignal(signal, narrative);
-      console.log(`\n[agent] sinyal baru â ${stored.market} ${stored.direction} (confidence ${stored.confidence})`);
+      console.log(`\n[agent] sinyal baru — ${stored.market} ${stored.direction} (confidence ${stored.confidence})`);
       console.log(`  reasoning: ${stored.reasoning.join(" | ")}`);
       console.log(`  narasi: ${stored.narrative}`);
       
+      // Push ke Telegram
+      const telegramMsg = `🚨 *DREAMBOT SIGNAL* 🚨\n\n*${stored.market}* -> *${stored.direction}*\n_Confidence:_ ${Math.round(stored.confidence * 100)}%\n\n*Narrative:*\n${stored.narrative}\n\n[Lihat Live Dashboard](https://dreambot-dexsonia.vercel.app/)`;
+      sendTelegramAlert(telegramMsg);
+
       // Hari 9-10: Eksekusi otomatis
       import("./dreamdexClient").then((mod) => {
         mod.executeTrade(market, signal.direction, signal.confidence);

@@ -33,19 +33,33 @@ async function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
 }
 
 async function callLlmSummarizer(signal: Signal, apiUrl: string): Promise<string> {
+  const isChatAPI = apiUrl.includes("chat/completions");
+  const body = isChatAPI 
+    ? {
+        model: process.env.LLM_MODEL || "llama3-8b-8192", // Default Groq model
+        messages: [{ role: "user", content: buildPrompt(signal) }],
+        temperature: 0.3
+      }
+    : { prompt: buildPrompt(signal) }; // Legacy custom endpoint fallback
+
   const res = await fetch(apiUrl, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       ...(process.env.LLM_API_KEY ? { Authorization: `Bearer ${process.env.LLM_API_KEY}` } : {}),
     },
-    body: JSON.stringify({ prompt: buildPrompt(signal) }),
+    body: JSON.stringify(body),
   });
+  
   if (!res.ok) throw new Error(`LLM API HTTP ${res.status}`);
   const data = await res.json();
-  const text = data.text ?? data.content?.[0]?.text;
-  if (!text) throw new Error("LLM API response tidak punya field teks yang dikenali");
-  return text;
+  
+  const text = isChatAPI 
+    ? data.choices?.[0]?.message?.content 
+    : (data.text ?? data.content?.[0]?.text);
+    
+  if (!text) throw new Error("LLM API response did not contain valid text");
+  return text.trim();
 }
 
 function buildPrompt(signal: Signal): string {
