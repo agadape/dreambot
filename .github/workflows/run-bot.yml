@@ -2,6 +2,8 @@ name: Run DreamBot Agent
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "*/5 * * * *" # Runs automatically every 5 minutes
 
 jobs:
   run-bot:
