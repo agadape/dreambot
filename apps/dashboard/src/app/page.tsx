@@ -150,6 +150,43 @@ export default function Dashboard() {
               {/* Inner Core */}
               <div className="h-full bg-[#0a0a0a] rounded-[calc(2rem-0.5rem)] p-8 md:p-12 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] flex flex-col justify-between gap-12 relative overflow-hidden">
                 
+                {/* Glowing Sparkline Chart Background */}
+                <svg className="absolute inset-0 w-full h-full opacity-40 pointer-events-none" preserveAspectRatio="none" viewBox="0 0 100 100">
+                  <defs>
+                    <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#10b981" stopOpacity="0.4" />
+                      <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
+                    </linearGradient>
+                    <filter id="glow">
+                      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                      <feMerge>
+                        <feMergeNode in="coloredBlur"/>
+                        <feMergeNode in="SourceGraphic"/>
+                      </feMerge>
+                    </filter>
+                  </defs>
+                  {/* Area under the line */}
+                  <motion.path 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 1.5, delay: 0.5 }}
+                    d="M 0 100 L 0 90 L 15 75 L 30 80 L 45 40 L 60 50 L 75 25 L 90 30 L 100 15 L 100 100 Z" 
+                    fill="url(#chartGradient)" 
+                  />
+                  {/* The Line */}
+                  <motion.path 
+                    initial={{ pathLength: 0, opacity: 0 }}
+                    animate={{ pathLength: 1, opacity: 1 }}
+                    transition={{ duration: 2, ease: [0.32, 0.72, 0, 1], delay: 0.2 }}
+                    d="M 0 90 L 15 75 L 30 80 L 45 40 L 60 50 L 75 25 L 90 30 L 100 15" 
+                    fill="none" 
+                    stroke="#10b981" 
+                    strokeWidth="2" 
+                    vectorEffect="non-scaling-stroke"
+                    filter="url(#glow)"
+                  />
+                </svg>
+
                 {/* Decoration */}
                 <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-[80px] group-hover:bg-emerald-500/10 transition-colors duration-1000" />
                 
@@ -159,7 +196,7 @@ export default function Dashboard() {
                 </div>
                 
                 <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-8">
-                  <div className="text-7xl md:text-9xl font-medium tracking-tighter text-white">
+                  <div className="text-7xl md:text-9xl font-medium tracking-tighter text-white drop-shadow-[0_0_30px_rgba(255,255,255,0.1)]">
                     {perf ? (perf.winRate * 100).toFixed(1) : "0.0"}<span className="text-zinc-700 text-5xl md:text-7xl">%</span>
                   </div>
                   
