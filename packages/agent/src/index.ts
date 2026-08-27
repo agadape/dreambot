@@ -94,7 +94,9 @@ async function main(): Promise<void> {
   };
 
   await runTick();
-  setInterval(runTick, LOOP_INTERVAL_MS);
+  
+  console.log("[agent] tick selesai. Keluar dari proses agar CRON berikutnya bisa berjalan.");
+  process.exit(0);
 }
 
 main().catch((err) => {

@@ -68,8 +68,13 @@ export async function saveSignal(
     nonce: meta?.nonce,
     strikePrice: meta?.strikePrice,
   };
-  const all = await loadSignals();
+  let all = await loadSignals();
   all.push(stored);
+
+  // Mencegah Max Request Size 10MB di Upstash (Redis) dengan membatasi array ke 100 sinyal terbaru
+  if (all.length > 100) {
+    all = all.slice(-100);
+  }
 
   if (redis) {
     await redis.set("dreambot:signals", all);
