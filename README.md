@@ -18,13 +18,21 @@ DreamBot Signal is a fully autonomous, serverless AI trading agent designed to m
 
 Instead of being a "black-box" trading bot, DreamBot is **100% transparent**. Every generated signal comes with an auditable **Execution Trace** and a human-readable narrative, pushing live alerts directly to a **Telegram Bot** and updating a breathtaking Awwwards-tier public dashboard.
 
-## ⚡ Core Features
+## 🚀 Core Innovations & Hackathon Judging Criteria
 
-- **Transparent Rule-Based Engine**: Signals are mathematically generated via momentum and volatility readings, cross-referenced against the *Implied Probability* of the DreamDEX on-chain orderbook.
-- **Neural Narrative Generation (LLM)**: Pure numerical data is translated into professional quantitative market sentiment summaries using Groq's high-speed inference (Llama 3.1).
-- **100% Autonomous Architecture**: Powered by GitHub Actions CRON jobs + Vercel KV. No VPS, no persistent servers needed. It wakes up every 5 minutes, analyzes the market, updates the database, and goes back to sleep.
-- **Real-time Telegram Alerts**: Instant push notifications to your phone the second an anomaly is detected.
-- **Awwwards-Tier 3D Dashboard**: A visually striking, brutalist UI built with Next.js, Framer Motion, and Three.js (React Three Fiber) to publicly prove the bot's execution history and win rate.
+### 1. The X-Factor: Zero-Trust "Commit-Reveal" Architecture (Innovation & Technical)
+Instead of just asking users to *trust* that the bot is profitable, DreamBot uses a **cryptographic Commit-Reveal scheme** natively on Somnia Shannon Testnet. 
+- **COMMIT**: When a signal is generated, the bot creates a `keccak256` hash of its prediction + a cryptographic nonce. It sends this hash as a payload in a 0-value transaction to the Somnia chain **before** the 15-minute window closes.
+- **REVEAL**: Once the Event Contract settles, the bot reveals the raw data on the public dashboard. 
+- **VERIFY**: Anyone (including hackathon judges) can click **"VERIFY COMMITMENT"** on the dashboard to view the transaction on the Somnia Block Explorer, mathematically proving the bot predicted the future, not the past.
+
+### 2. DreamBot Oracle as a Public Good (Business & Ecosystem Impact)
+DreamBot is not just a personal trading bot; it is **Micro-Hedging Infrastructure**. By surfacing its verified win-rate and public signals, it acts as a "Social Trading Oracle". 
+- **Attracting Users**: The dashboard includes a "Share to X (Twitter)" button for winning trades, instantly generating viral proof-of-performance marketing for the Somnia ecosystem.
+- **Ecosystem Expansion**: Other developers in the Somnia ecosystem can query the DreamBot API to trigger automated hedges for their own liquidity providers when short-term volatility spikes.
+
+### 3. Awwwards-Tier 3D Brutalist Dashboard (UX & Design)
+Built with Next.js, Framer Motion, and React Three Fiber, the public dashboard provides a visually striking, highly technical "Quant Terminal" aesthetic. It translates pure mathematical data into neural narratives via Groq (Llama 3.1) so retail users can understand *why* the market is moving.
 
 ## 🏗 Architecture
 
